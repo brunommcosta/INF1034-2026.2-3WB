@@ -8,9 +8,9 @@ minhaImagem=image.load("sailor moon.png")
 minhaImagem=transform.scale(minhaImagem, (400//3,732//3))
 minhaFonte=font.Font("MonimerSerif.otf",25)
 mixer.music.load("abertura sailor moon.mp3")
-# mixer.music.play(-1)
+mixer.music.play(-1)
 Som1= mixer.Sound("moon healing.mp3")
-# Som2= mixer.Sound("brilho.mp3")
+Som2= mixer.Sound("brilho.mp3")
 Som3= mixer.Sound("glitter.mp3")
 nuvem_x=500
 c="#97D1FA"
@@ -26,8 +26,8 @@ while running:
             if ev.button== 1:
                 if mouseY<=200:
                     Som3.play()
-                # elif mouseY<=400:
-                    # Som2.play()  
+                elif mouseY<=400:
+                    Som2.play()  
                 else:
                     Som1.play()
 
@@ -49,7 +49,6 @@ while running:
     else:
         c="#E35A38"
     screen.fill(c)
-            #superficie,cor,(x,y,larg,alt)
     draw.line(screen,"#FFF251",(mouseX-60,mouseY+60),(mouseX+60,mouseY-60),4)
     draw.line(screen,"#FFF251",(mouseX,mouseY-60),(mouseX,mouseY+60),4)
     draw.line(screen,"#FFF251",(mouseX-60,mouseY-60),(mouseX+60,mouseY+60),4)
