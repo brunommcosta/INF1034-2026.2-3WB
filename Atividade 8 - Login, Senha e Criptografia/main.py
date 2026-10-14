@@ -35,9 +35,9 @@ def validarSenha(senha):
 def criptografaSenha(senha):
     senhaNova = ""
     tamanho = ord('z') - ord('0') + 1     
-    for carac in senha:
-        if '0' <= carac <= 'z':
-            pos = (ord(carac) - ord('0') + 3) % tamanho
+    for i in senha:
+        if '0' <= i <= 'z':
+            pos = (ord(i) - ord('0') + 3) % tamanho
             senhaNova += chr(pos + ord('0'))
         else:
             senhaNova += carac
