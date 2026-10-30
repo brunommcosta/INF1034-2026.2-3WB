@@ -28,7 +28,6 @@ direita = True
 walking = False
 parouAndar = False
 
-#controle da animação
 curr_frame = 0
 tempo = 0
 
@@ -55,7 +54,6 @@ while True:
 
 
 
-    #movimento
     keys=key.get_pressed()
     walking = False
 
@@ -73,7 +71,6 @@ while True:
         tempo = 0
     parouAndar = walking
 
-    #animação
     tempo = tempo + dt
     tempo_sec = tempo/10000
 
@@ -90,7 +87,6 @@ while True:
             curr_frame = 0
         tempo = 0
 
-    #desenho dos elementos na tela
     screen.fill((255, 255, 255))
 
     if walking:
