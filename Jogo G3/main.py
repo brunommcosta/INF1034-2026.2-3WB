@@ -5,7 +5,6 @@ clock = pygame.time.Clock()
 
 pygame.init()
 screen = pygame.display.set_mode((800, 600))
-pygame.display.set_caption('Hello World!')
 
 escala = 2
 
