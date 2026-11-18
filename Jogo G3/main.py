@@ -104,7 +104,7 @@ pontos = [
 
 vilao_x = pontos[0][0]
 vilao_y = pontos[0][1]
-vilao_speed = 1
+vilao_speed = 0.75
 vilao_direction = Direita
 vilao_andando = True
 vilao_was_andando = True
@@ -121,6 +121,7 @@ aviso_tempo = 0
 duracao_aviso = 3000
 fonte = pygame.font.Font(None, 30)
 fonte_grande = pygame.font.Font(None, 56)
+game_over=False
 
 while True:
     for event in pygame.event.get():
@@ -132,26 +133,28 @@ while True:
     dt = clock.get_time()
 
     keys = pygame.key.get_pressed()
+    keys = pygame.key.get_pressed()
     running = False
     dx = 0
     dy = 0
 
-    if keys[pygame.K_RIGHT]:
-        dx += speed
-        direction = Direita
-        running = True
-    if keys[pygame.K_LEFT]:
-        dx -= speed
-        direction = Esquerda
-        running = True
-    if keys[pygame.K_UP]:
-        dy -= speed
-        direction = Cima
-        running = True
-    if keys[pygame.K_DOWN]:
-        dy += speed
-        direction = Baixo
-        running = True
+    if not game_over:
+        if keys[pygame.K_RIGHT]:
+            dx += speed
+            direction = Direita
+            running = True
+        if keys[pygame.K_LEFT]:
+            dx -= speed
+            direction = Esquerda
+            running = True
+        if keys[pygame.K_UP]:
+            dy -= speed
+            direction = Cima
+            running = True
+        if keys[pygame.K_DOWN]:
+            dy += speed
+            direction = Baixo
+            running = True
 
     hero_x += dx
     hero_rect = pygame.Rect(hero_x + hit_off_x, hero_y + hit_off_y, hit_w, hit_h)
@@ -227,6 +230,8 @@ while True:
                 advertencias = advertencias + 1
                 aviso_tempo = duracao_aviso
 
+            if advertencias >= 3:
+                game_over = True
         if vilao_tempo_parado >= tempo_observando:
             vilao_andando = True
             ponto_alvo = (ponto_alvo + 1) % len(pontos)
@@ -285,4 +290,14 @@ while True:
         exclamacao = fonte_grande.render("!", True, (220, 0, 0))
         screen.blit(exclamacao, (vilao_x + W//2 - exclamacao.get_width()//2, vilao_y - 30))
 
+    if game_over:
+        texto_derrota = fonte_grande.render("GAME OVER", True, (220, 0, 0))
+        texto_sub = fonte.render("Voce recebeu muitas advertencias!", True, (0, 0, 0))
+
+        screen.blit(texto_derrota,
+            (400 - texto_derrota.get_width()//2, 250))
+
+        screen.blit(texto_sub,
+            (400 - texto_sub.get_width()//2, 310))
+    
     pygame.display.update()
