@@ -1,6 +1,24 @@
 import pygame, sys
 from pygame.locals import QUIT
 
+def desenhar_coracao(surface, x, y, tamanho, preenchido):
+
+    if preenchido:
+        cor = (230, 50, 100)
+    else:
+        cor = (200, 200, 200)
+
+    pontos_coracao = [
+        (x + tamanho//2, y + tamanho),
+        (x, y + tamanho//3),
+        (x + tamanho//6, y),
+        (x + tamanho//2, y + tamanho//4),
+        (x + tamanho*5//6, y),
+        (x + tamanho, y + tamanho//3)
+    ]
+
+    pygame.draw.polygon(surface, cor, pontos_coracao)
+
 clock = pygame.time.Clock()
 
 pygame.init()
@@ -64,6 +82,13 @@ npc_rects = []
 for i in range(len(npcs)):
     npc_x, npc_y = npcs[i]
     npc_rects.append(pygame.Rect(npc_x + hit_off_x, npc_y + hit_off_y, hit_w, hit_h))
+npc_objetivo = 2
+
+npc_rects_obstaculos = npc_rects.copy()
+
+beijos = 0
+meta_beijos = 15
+distancia_beijo = 40
 
 mostrar_hitbox = False
 
@@ -122,12 +147,20 @@ duracao_aviso = 3000
 fonte = pygame.font.Font(None, 30)
 fonte_grande = pygame.font.Font(None, 56)
 game_over=False
+game_won = False
+beijar_pressionado = False
 
 while True:
+    beijar_pressionado = False
+
     for event in pygame.event.get():
         if event.type == QUIT:
             pygame.quit()
             sys.exit()
+
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_e:
+                beijar_pressionado = True
 
     clock.tick(60)
     dt = clock.get_time()
@@ -158,13 +191,70 @@ while True:
 
     hero_x += dx
     hero_rect = pygame.Rect(hero_x + hit_off_x, hero_y + hit_off_y, hit_w, hit_h)
-    if hero_rect.collidelist(npc_rects) != -1:
+    if hero_rect.collidelist(npc_rects_obstaculos) != -1:
         hero_x -= dx
 
     hero_y += dy
     hero_rect = pygame.Rect(hero_x + hit_off_x, hero_y + hit_off_y, hit_w, hit_h)
-    if hero_rect.collidelist(npc_rects) != -1:
+    if hero_rect.collidelist(npc_rects_obstaculos) != -1:
         hero_y -= dy
+
+    if not game_over and not game_won and beijar_pressionado:
+        if hero_rect.colliderect(npc_rects[npc_objetivo]):
+            if beijos < meta_beijos:
+                beijos += 1
+
+                if beijos >= meta_beijos:
+                    game_won = True
+
+        if encostando_objetivo and beijos < meta_beijos and not game_over:
+         texto_interacao = fonte.render(
+            "Aperte E para beijar!",
+            True,
+            (220, 50, 100)
+        )
+
+        npc_x, npc_y = npcs[npc_objetivo]
+
+        screen.blit(
+            texto_interacao,
+            (npc_x - 30, npc_y - 30)
+        )
+
+        npc_x, npc_y = npcs[npc_objetivo]
+
+        screen.blit(
+            texto_interacao,
+            (npc_x - 30, npc_y - 30)
+        )
+    npc_x, npc_y = npcs[npc_objetivo]
+        # Área de interação ao redor do NPC objetivo
+    area_interacao = npc_rects[npc_objetivo].inflate(12, 12)
+
+    encostando_objetivo = hero_rect.colliderect(area_interacao)
+
+    area_interacao = npc_rects[npc_objetivo].inflate(12, 12)
+
+    encostando_objetivo = hero_rect.colliderect(area_interacao)
+
+    # Interação com a tecla E
+    if not game_over and not game_won:
+        if encostando_objetivo and beijar_pressionado:
+            if beijos < meta_beijos:
+                beijos += 1
+
+                if beijos >= meta_beijos:
+                    game_won = True
+    hero_centro_x = hero_x + W//2
+    hero_centro_y = hero_y + H//2
+
+    npc_centro_x = npc_x + W//2
+    npc_centro_y = npc_y + H//2
+
+    distancia = ((hero_centro_x - npc_centro_x)**2 +
+                (hero_centro_y - npc_centro_y)**2)**0.5
+
+    pode_beijar = distancia < distancia_beijo
 
     if running != was_running:
         curr_frame = 0
@@ -229,6 +319,8 @@ while True:
                 vilao_ja_viu = True
                 advertencias = advertencias + 1
                 aviso_tempo = duracao_aviso
+            if encostando_objetivo:
+                game_over=True
 
             if advertencias >= 3:
                 game_over = True
@@ -254,12 +346,22 @@ while True:
         vilao_anim_time = 0
 
     screen.fill((255, 255, 255))
+    # Medidor de beijos
+    for i in range(meta_beijos):
+        x = 20 + i * 38
+        y = 535
+
+        desenhar_coracao(screen,x,y,30,i < beijos)
 
     for i in range(len(npcs)):
         npc_x, npc_y = npcs[i]
         npc_col = Baixo * frames + (npc_frame + i) % frames
         screen.blit(npc_spritesheet, (npc_x, npc_y),
                     (W * npc_col, 0, W, H))
+
+    npc_x, npc_y = npcs[npc_objetivo]
+
+    desenhar_coracao(screen,npc_x + W//2 - 8,npc_y - 18,16,(255, 50, 120))
 
     vilao_col = vilao_direction * frames + vilao_frame
     if vilao_andando:
@@ -277,12 +379,6 @@ while True:
         screen.blit(idle_spritesheet, (hero_x, hero_y),
                     (W * frame_col, 0, W, H))
 
-    if mostrar_hitbox:
-        for rect in npc_rects:
-            pygame.draw.rect(screen, (255, 0, 0), rect, 1)
-        pygame.draw.rect(screen, (0, 0, 255),
-                         (hero_x + hit_off_x, hero_y + hit_off_y, hit_w, hit_h), 1)
-
     texto_adv = fonte.render(f"Advertências: {advertencias}", True, (0, 0, 0))
     screen.blit(texto_adv, (10, 10))
 
@@ -299,5 +395,15 @@ while True:
 
         screen.blit(texto_sub,
             (400 - texto_sub.get_width()//2, 310))
-    
+    if game_won:
+        texto_vitoria = fonte_grande.render(
+            "VOCE CONQUISTOU SEU AMOR!",
+            True,
+            (220, 50, 100)
+        )
+
+        screen.blit(
+            texto_vitoria,
+            (400 - texto_vitoria.get_width()//2, 250)
+    )
     pygame.display.update()
