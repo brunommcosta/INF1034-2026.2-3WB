@@ -129,7 +129,7 @@ pontos = [
 
 vilao_x = pontos[0][0]
 vilao_y = pontos[0][1]
-vilao_speed = 0.75
+vilao_speed = 1.5
 vilao_direction = Direita
 vilao_andando = True
 vilao_was_andando = True
